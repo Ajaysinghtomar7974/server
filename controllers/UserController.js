@@ -26,45 +26,50 @@ class UserController{
             console.log(error)
         }
     }
-    static login = async(req,res)=>{
-        try {
-            const {email,password}=req.body
-            const user = await UserModel.findOne({email})
-            if(!user){
-                return res.status(400).json({message:"invalid credentials"});
-            }
-            const isMatch= await bcrypt.compare(password,user.password)
-            // console.log(isMatch)
-           if(!isMatch){
-            return res.status(400).json({messqage:"invalid credentials"})
-           }
-           //token create
-           const token = jwt.sign({ID:user._id},process.env.JWT_SECRET)
-           console.log(token)
-           //send token in http-token only
-           res.cookie("token",token,{
-            httpOnly:true,
-           })
-           res
-           .status(200)
-           .json({message:"Login successful",
-                    role:user.role,
-                    name: user.name,
-                    email: user.email,
-           })
+    static login = async (req, res) => {
+    try {
+      // console.log(req.body)
+      const { email, password } = req.body;
 
+      const user = await UserModel.findOne({ email });
+      //console.log(user)
+      if (!user) {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
 
-        } catch (error) {
-            console.log(error)
-        }
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: " Invalid credentials " });
+      }
+      //console.log(isMatch)
+      //token create
+      const token = jwt.sign(
+        { ID: user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: "2d" } //2 din me token expire ho jayega
+      );
+      //  console.log(token)
+
+      // Send token in HTTP-Only cookie
+      // Inside login controller
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true, // ✅ required for HTTPS (Render + Netlify are HTTPS)
+        sameSite: "None", // ✅ required for cross-site cookies
+        maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+      });
+
+      res.status(200).json({
+        message: "Login successful",
+        role: user.role,
+        name: user.name,
+        email: user.email,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Server error", error });
     }
-    static profile = async(req,res)=>{
-        try {
-            console.log("hello profile")
-        } catch (error) {
-            console.log(error)
-        }
-    }
+  };
 
     static logout = async(req,res)=>{
         try {
