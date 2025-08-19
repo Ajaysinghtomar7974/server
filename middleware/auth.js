@@ -7,7 +7,7 @@ const checkAuth = async (req,res,next)=>{
         {message:'unauthorised'}
     ); 
     try {
-        const decoded = jwt.verify(token,'ajay@1234')
+        const decoded = jwt.verify(token,process.env.JWT_SECRET)
         // console.log(decoded)
         
         //fetch full user from db

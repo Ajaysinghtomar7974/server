@@ -39,7 +39,7 @@ class UserController{
             return res.status(400).json({messqage:"invalid credentials"})
            }
            //token create
-           const token = jwt.sign({ID:user._id},'ajay@1234')
+           const token = jwt.sign({ID:user._id},process.env.JWT_SECRET)
            console.log(token)
            //send token in http-token only
            res.cookie("token",token,{
